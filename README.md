@@ -1,6 +1,6 @@
 # NYC-Regents-Disparities
 
-This project analyzes disparities in New York City public high school Regents exam outcomes across various demographics, including race, gender, and geography. By examining standardized testing data alongside school staffing, class sizes, and demographic information, the project aims to uncover systemic inequities and inform policy decisions.
+This project analyzes disparities in New York City public high school Regents exam outcomes using a multi-level model across key demographics, including race, gender, and geographic location. By integrating standardized testing data with information on school staffing, class sizes, and student demographics, the project aims to uncover systemic inequities and inform data-driven policy decisions.
 
 ---
 
@@ -8,7 +8,7 @@ This project analyzes disparities in New York City public high school Regents ex
 
 The New York State Regents Exams are standardized assessments required for high school graduation. However, performance disparities have been observed across different student groups. This project seeks to:
 
-- Analyze Regents exam outcomes from 2014 to 2023.
+- Analyze Regents exam outcomes from 2017 to 2023.
 - Identify correlations between exam performance and factors such as race, gender, and school location.
 - Assess the impact of class sizes, faculty demographics, and school resources on student achievement.
 - Provide visualizations and statistical analyses to support findings.
@@ -21,9 +21,9 @@ The New York State Regents Exams are standardized assessments required for high 
 NYC-Regents-Disparities/
 ├── data/
 │   ├── raw/                 # Original datasets
-│   └── processed/           # Cleaned and merged datasets
+│   └── cleaned/             # Cleaned and merged datasets
 ├── notebooks/               # Jupyter notebooks for analysis
-├── scripts/                 # Python scripts for data processing
+├── src/                     # Python scripts for data processing
 ├── visuals/                 # Generated charts and graphs
 ├── .github/
 │   └── workflows/           # GitHub Actions workflows
@@ -36,7 +36,7 @@ NYC-Regents-Disparities/
 
 ## 📁 Data Sources
 
-The project utilizes publicly available datasets, including:
+The project utilizes publicly available datasets from https://opendata.cityofnewyork.us/, including:
 
 - NYC Department of Education Regents exam results
 - School demographic and staffing data
@@ -74,7 +74,7 @@ All data sources are cited within the respective notebooks and scripts.
 ## 📈 Usage
 
 - Navigate to the `notebooks/` directory to explore Jupyter notebooks containing data analyses and visualizations.
-- Use the scripts in the `scripts/` directory to preprocess data or generate specific plots.
+- Use the scripts in the `src/` directory to preprocess data or generate specific plots.
 - Visual outputs are stored in the `visuals/` directory for reference.
 
 ---
@@ -101,4 +101,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📬 Contact
 
-For questions or collaborations, please contact [vikobaldigi](https://github.com/vikobaldigi).
+For questions or collaborations, please contact [Vi Kobal a.k.a. Philip Kovacevic](mailto:vk@vikobal.digial?subject=[GitHub]%20Source%20Han%20Sans).
