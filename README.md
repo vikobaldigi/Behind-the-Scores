@@ -139,8 +139,3 @@ The Neighborhood Educational Quality (NEQ) index measures the zoning and land us
 Kovacevic, V. (2026). *Behind the Score: Neighborhood Policy Context and Regents Exam Performance in NYC Public High Schools*. M.S. thesis, CUNY Graduate Center.
 
 ---
-
-## GitHub Pages
-
-Once pushed, enable GitHub Pages (Settings → Pages → Deploy from branch → main → / root).
-Site will be live at: `https://[your-username].github.io/behind-the-score`
