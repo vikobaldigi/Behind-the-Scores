@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Behind the Score — Vi Kovacevic, CUNY 2026</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/scrollama"></script>
+<style>
+/* ─── EDITORIAL RESET ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #FAFAF8;
+  color: #1A1A18;
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── TYPE SCALE ─────────────────────────────────────────────── */
+:root {
+  /* Editorial palette — warm neutrals + deliberate accent colors */
+  --ink:        #1A1A18;   /* near-black for body text */
+  --ink-2:      #3D3D3A;   /* secondary text */
+  --ink-3:      #767672;   /* captions, labels */
+  --rule:       #D4D4CF;   /* hairlines, borders */
+  --paper:      #FAFAF8;   /* page background */
+  --paper-2:    #F2F2EE;   /* slightly warm off-white */
+  --paper-3:    #E8E8E3;   /* subtle divider zones */
+
+  /* Accent — used sparingly, not as background fill */
+  --accent:     #C0392B;   /* NYT-red: only for key numbers */
+  --accent-dark:#8B2020;
+
+  /* Data colors — distinct, accessible, non-neon */
+  --alg:  #B45309;   /* warm amber — Algebra */
+  --ela:  #1D4E89;   /* deep navy — ELA (primary finding) */
+  --sci:  #2D6A4F;   /* forest green — Living Environment */
+
+  /* Semantic data states */
+  --sig:   #1D4E89;  /* significant result */
+  --trend: #7B6000;  /* trending */
+  --ns:    #767672;  /* not significant */
+
+  /* Chart grid / axis */
+  --grid:  #E2E2DC;
+  --axis-text: #767672;
+
+  --nav-h: 48px;
+}
+
+/* ─── HEADER — editorial masthead style ──────────────────────── */
+.site-header {
+  background: var(--ink);
+  color: #FAFAF8;
+  padding: clamp(3rem, 8vw, 6rem) clamp(2rem, 6vw, 5rem) clamp(2.5rem, 6vw, 4rem);
+  border-bottom: 3px solid var(--accent);
+  position: relative;
+}
+.kicker {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+  display: block;
+}
+.site-header h1 {
+  font-size: clamp(2.4rem, 5.5vw, 5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
+  margin-bottom: 0.5rem;
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+.site-header h1 span {
+  display: block;
+  color: #FAFAF8;
+  opacity: 0.35;
+  font-size: 0.5em;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.15em;
+}
+.site-header .dek {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: rgba(250,250,248,0.7);
+  max-width: 580px;
+  margin: 1.25rem 0 2rem;
+  line-height: 1.65;
+  font-weight: 400;
+}
+.byline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.78rem;
+  color: rgba(250,250,248,0.55);
+  letter-spacing: 0.03em;
+  border-top: 1px solid rgba(250,250,248,0.15);
+  padding-top: 1rem;
+  margin-top: 0;
+}
+.byline-row strong { color: rgba(250,250,248,0.85); }
+
+/* ─── NAV — thin, editorial ──────────────────────────────────── */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  height: var(--nav-h);
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(1.5rem, 4vw, 3rem);
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.nav-brand {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(250,250,248,0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.progress-track {
+  flex: 1;
+  height: 2px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.12s ease;
+}
+.nav-count {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.7rem;
+  color: rgba(250,250,248,0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── SCROLL LAYOUT ──────────────────────────────────────────── */
+.scroll-layout {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  max-width: 1500px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* Text column */
+.steps-col {
+  padding: 0 3rem 10rem 3.5rem;
+  border-right: 1px solid var(--rule);
+}
+
+/* Sticky chart column */
+.graphic-col {
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(85svh - var(--nav-h));
+  padding: 1.5rem 2.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+}
+.graphic-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.graphic-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+.graphic-label {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+.graphic-title {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  transition: color 0.3s;
+}
+.graphic-body {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.viz-pane {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.viz-pane.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.viz-pane svg {
+  width: 94%;
+  height: 88%;
+  display: block;
+}
+
+/* ─── STEP CARDS — magazine/editorial feel ───────────────────── */
+.step {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 4rem 0;
+}
+.step-card {
+  width: 100%;
+  opacity: 0.25;
+  transform: translateY(4px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.step.is-active .step-card { opacity: 1; transform: translateY(0); }
+
+.scene-label {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+  display: block;
+}
+.step-card h2 {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+}
+.step-card h3 {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  margin: 1.5rem 0 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+}
+.step-card p {
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--ink-2);
+  margin-bottom: 0.9rem;
+}
+.step-card p:last-child { margin-bottom: 0; }
+
+/* ─── KEY NUMBERS — editorial stat style ─────────────────────── */
+.key-numbers {
+  margin: 1.25rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--rule);
+  background: var(--rule);
+  overflow: hidden;
+}
+.kn-item {
+  background: var(--paper);
+  padding: 0.9rem 1rem;
+  text-align: center;
+}
+.kn-val {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(1.4rem, 2.8vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+  display: block;
+}
+.kn-val.sig  { color: var(--ela); }
+.kn-val.warn { color: var(--alg); }
+.kn-val.pos  { color: var(--sci); }
+.kn-val.red  { color: var(--accent); }
+.kn-lbl {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+  margin-top: 0.3rem;
+  display: block;
+  line-height: 1.4;
+}
+
+/* ─── PULL QUOTE / CALLOUT ───────────────────────────────────── */
+.pull {
+  border-left: 3px solid var(--ink);
+  padding: 0.75rem 1.1rem;
+  margin: 1.25rem 0;
+  background: var(--paper-2);
+}
+.pull p {
+  font-size: 0.93rem !important;
+  line-height: 1.7 !important;
+  color: var(--ink-2) !important;
+  margin: 0 !important;
+  font-style: italic;
+}
+.pull.finding {
+  border-color: var(--ela);
+  background: #F0F4F9;
+}
+.pull.finding p { color: #1D4E89 !important; font-style: normal; }
+.pull.caution {
+  border-color: var(--alg);
+  background: #FDF8F0;
+}
+.pull.caution p { color: #7B5200 !important; font-style: normal; }
+
+/* ─── TOOLTIP ────────────────────────────────────────────────── */
+#tip {
+  position: fixed;
+  background: var(--ink);
+  color: #FAFAF8;
+  padding: 0.5rem 0.75rem;
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 9999;
+  max-width: 210px;
+  border-left: 2px solid var(--accent);
+}
+
+/* ─── D3 BASE ────────────────────────────────────────────────── */
+.axis text {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  fill: #767672;
+}
+.axis line, .axis path { stroke: #E2E2DC; }
+.chart-ttl {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  fill: #1A1A18;
+  letter-spacing: -0.01em;
+}
+.chart-sub {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  fill: #767672;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────────────── */
+.site-footer {
+  background: var(--ink);
+  color: rgba(250,250,248,0.45);
+  padding: 3rem clamp(2rem,6vw,5rem);
+  font-family: -apple-system,'Helvetica Neue',Arial,sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.9;
+  border-top: 3px solid var(--accent);
+}
+.site-footer strong { color: rgba(250,250,248,0.85); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .scroll-layout { grid-template-columns: 1fr; }
+  .steps-col { border-right: none; border-bottom: none; padding: 0 1.5rem 4rem; }
+  .graphic-col {
+    position: sticky;
+    top: var(--nav-h);
+    height: 44svh;
+    padding: 1rem 1.5rem;
+    order: -1;
+    border-bottom: 1px solid var(--rule);
+  }
+  .step { min-height: auto; padding: 1.75rem 0; }
+  .step-card { opacity: 1 !important; transform: none !important; }
+}
+@media (max-width: 640px) {
+  .site-header { padding: 2.5rem 1.5rem 2rem; }
+  .graphic-col { height: 40svh; padding: 0.75rem 1rem; }
+  .steps-col { padding: 0 1rem 3rem; }
+  .sticky-nav { padding: 0 1rem; gap: 0.6rem; }
+  .nav-brand { display: none; }
+  .key-numbers { grid-template-columns: repeat(2, 1fr); }
+  .step-card h2 { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="kicker">M.S. Thesis · CUNY Graduate Center · 2026</span>
+  <h1><span>Behind</span>the Score</h1>
+  <p class="dek">Does neighborhood zoning policy independently predict school performance in NYC — after controlling for everything measurable about the schools themselves?</p>
+  <div class="byline-row">
+    <span><strong>Vi Kovacevic</strong></span>
+    <span>409 public high schools · 43 community districts</span>
+    <span>Two-level Hierarchical Linear Model (HLM) · 2023 primary · 2022 &amp; 2024 validation</span>
+    <span>Adviser: Dr. Howard Everson</span>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <span class="nav-brand">Behind the Score</span>
+  <div class="progress-track"><div class="progress-fill" id="prog"></div></div>
+  <span class="nav-count" id="scene-ct">1 / 10</span>
+</nav>
+
+<div class="scroll-layout">
+
+  <div class="steps-col">
+
+    <div class="step" data-step="1" data-viz="hook">
+      <div class="step-card">
+        <span class="scene-label">1 of 10</span>
+        <h2>Same city. Different outcomes.</h2>
+        <p>Lower Manhattan and East New York are both NYC public schools. Same Department of Education rules. Same Regents exams. Same state standards.</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val pos">71.8</span><span class="kn-lbl">Lower Manhattan average ELA score</span></div>
+          <div class="kn-item"><span class="kn-val red">58.4</span><span class="kn-lbl">East New York average ELA score</span></div>
+        </div>
+        <p>Each dot is one school. The color shows how the surrounding neighborhood is zoned — how much commercial activity the city permits there. Blue-green means high, red means low.</p>
+        <div class="pull"><p>The question: how much of that 13-point gap is about the schools, and how much is about the neighborhoods those schools sit in?</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="2" data-viz="icc">
+      <div class="step-card">
+        <span class="scene-label">2 of 10</span>
+        <h2>Before accounting for anything about the schools, neighborhood location already explains 11–21% of score variation.</h2>
+        <p>We asked: if you knew only which neighborhood a school is in — not its teachers, not its students, not its resources — how much of the score difference between schools could you predict?</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val warn">11.1%</span><span class="kn-lbl">Algebra — explained by location alone</span></div>
+          <div class="kn-item"><span class="kn-val sig">21.4%</span><span class="kn-lbl">ELA — explained by location alone</span></div>
+          <div class="kn-item"><span class="kn-val sig">21.2%</span><span class="kn-lbl">Living Environment — explained by location alone</span></div>
+        </div>
+        <p>For English, 21 out of every 100 points of difference between schools comes from location — before we know a single fact about the school itself.</p>
+        <div class="pull finding"><p>These numbers — called the Intraclass Correlation Coefficient (ICC) — confirm that neighborhood membership explains a meaningful share of between-school score variation, enough to warrant a two-level statistical model.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="3" data-viz="waterfall">
+      <div class="step-card">
+        <span class="scene-label">3 of 10</span>
+        <h2>School-level factors explain most of the between-neighborhood score gap — but not all of it. For ELA, 21% remains.</h2>
+        <p>We added everything measurable about the schools: what students they serve (race, poverty, English learner status), average class size, and school type. For most exams, that's enough.</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val">97.1%</span><span class="kn-lbl">Algebra — school factors explain</span></div>
+          <div class="kn-item"><span class="kn-val warn">78.8%</span><span class="kn-lbl">ELA — school factors explain</span></div>
+          <div class="kn-item"><span class="kn-val">95.2%</span><span class="kn-lbl">Living Environment — school factors explain</span></div>
+        </div>
+        <p>For Algebra: once you know the school, the neighborhood adds almost nothing. For ELA: 21% of the between-neighborhood gap is still unexplained after accounting for everything about the school.</p>
+        <div class="pull caution"><p>The remaining 21% of between-neighborhood ELA variance — unexplained by school-level factors — is what the NEQ policy context index is designed to test.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="4" data-viz="neq-build">
+      <div class="step-card">
+        <span class="scene-label">4 of 10</span>
+        <h2>We built a score for each neighborhood based on its zoning — how the city has decided land can be used there.</h2>
+        <p>We called it the NEQ (Neighborhood Educational Quality) index. It's built entirely from NYC zoning records — city planning data. No test scores go into building it.</p>
+        <h3>Two ingredients</h3>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val" style="font-size:0.85rem;letter-spacing:0">Commercial density</span><span class="kn-lbl">How much commercial building the city allows — higher means more businesses, more mixed-use activity</span></div>
+          <div class="kn-item"><span class="kn-val" style="font-size:0.85rem;letter-spacing:0">Residential zoning</span><span class="kn-lbl">What share of land is zoned residential-only — more residential means less mixed</span></div>
+        </div>
+        <p>The chart shows commercial density across the top 18 districts. Lower Manhattan is at 12.24. Fresh Meadows is at 0.002. The city set those numbers through zoning law.</p>
+        <div class="pull"><p>This isn't about whether a neighborhood is rich or poor. It's about how the city has legally defined what can exist there.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="5" data-viz="neq-bars">
+      <div class="step-card">
+        <span class="scene-label">5 of 10</span>
+        <h2>Manhattan scores highest. Outer borough residential neighborhoods score lowest. The pattern is geographic.</h2>
+        <p>Each bar is one community district. Hover to see its score, average Regents performance, and number of schools. The scale runs from 1 (most exclusively residential) to 10 (most commercially mixed).</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val pos" style="font-size:0.9rem">Highest</span><span class="kn-lbl">Lower Manhattan · Greenwich Village · Gramercy · Chelsea · Upper East Side</span></div>
+          <div class="kn-item"><span class="kn-val red" style="font-size:0.9rem">Lowest</span><span class="kn-lbl">Fresh Meadows · Bayside · SE Queens · South Beach · Rockaway</span></div>
+        </div>
+        <div class="pull caution"><p><strong>One thing to keep in mind:</strong> some outer-borough neighborhoods score low here because they're mostly residential suburbs — but their schools do well because those communities also have lower poverty rates. We account for that separately.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="6" data-viz="scatter-ela">
+      <div class="step-card">
+        <span class="scene-label">6 of 10</span>
+        <h2>Even after we control for everything about the schools, ELA scores are still higher in higher-zoned neighborhoods.</h2>
+        <p>Each dot is one of the 43 neighborhoods. The x-axis is its NEQ zoning score. The y-axis shows how that neighborhood's schools perform on ELA after removing all school-level factors — the neighborhood's "extra" contribution.</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val sig">+1.18</span><span class="kn-lbl">Points higher ELA score per step up in NEQ</span></div>
+          <div class="kn-item"><span class="kn-val sig">p = .003</span><span class="kn-lbl">★★ Statistically significant</span></div>
+          <div class="kn-item"><span class="kn-val sig">[+.41, +1.95]</span><span class="kn-lbl">Range of plausible values — all positive</span></div>
+        </div>
+        <div class="pull finding"><p>A school in a district one standard deviation higher on the NEQ index is predicted to score 1.18 ELA points higher, after all school-level controls. The 95% confidence interval [+0.41, +1.95] excludes zero.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="7" data-viz="scatter-three">
+      <div class="step-card">
+        <span class="scene-label">7 of 10</span>
+        <h2>The neighborhood association appears for English and science, but not for Algebra — and that subject-specificity is the central finding.</h2>
+        <p>We ran the same analysis for all three Regents exams. The results split cleanly by subject.</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val warn">Algebra</span><span class="kn-lbl">+0.275 · p=.368 · no effect</span></div>
+          <div class="kn-item"><span class="kn-val sig">English</span><span class="kn-lbl">+1.180 · p=.003 · ★★ significant</span></div>
+          <div class="kn-item"><span class="kn-val pos">Science</span><span class="kn-lbl">+0.931 · p=.004 · ★★ significant</span></div>
+        </div>
+        <p>Math seems to live mostly inside the classroom. English and science seem to extend beyond the school into the wider community: the language students hear, the resources around them.</p>
+        <div class="pull finding"><p>The Algebra null result is consistent with theory: mathematics instruction is more tightly coupled to in-school factors than language arts or science, which extend into the surrounding community environment.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="8" data-viz="forest">
+      <div class="step-card">
+        <span class="scene-label">8 of 10</span>
+        <h2>Every predictor in the model, with effect sizes and confidence intervals, shown across all three exams.</h2>
+        <p>Each row is one factor we measured. Each dot is its effect on scores. The horizontal bar shows our uncertainty. When a bar doesn't cross the center line, the effect is real and not just noise.</p>
+        <h3>Three things worth noticing</h3>
+        <p><strong>English Language Learner %</strong> barely moves Algebra scores but it's the single biggest factor for ELA. ELA is a language test — students still learning English score lower on it.</p>
+        <p><strong>Poverty %</strong> is negative for all three exams, consistently. The most reliable finding in the whole model.</p>
+        <p><strong>The NEQ neighborhood score</strong> is highlighted at the bottom. Its bar clears zero for English and science. For Algebra, it overlaps zero — no clear effect.</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="9" data-viz="validation">
+      <div class="step-card">
+        <span class="scene-label">9 of 10</span>
+        <h2>The model was run on 2022, 2023, and 2024 data. ELA and science show a consistent positive association each year.</h2>
+        <p>Each line tracks one exam across 2022, 2023, and 2024. Larger filled dots mean the result was statistically significant. All ELA and science dots sit above zero — the direction is consistent even in years where the result is weaker.</p>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val warn">2022</span><span class="kn-lbl">ELA +0.896 — trending, not quite significant</span></div>
+          <div class="kn-item"><span class="kn-val sig">2023</span><span class="kn-lbl">ELA +1.180 — ★★ significant</span></div>
+          <div class="kn-item"><span class="kn-val sig">2024</span><span class="kn-lbl">ELA +2.356 — ★★ significant</span></div>
+        </div>
+        <div class="pull finding"><p>ELA and science replicate across years. Algebra stays flat. 2022 was the first year back after COVID disruptions, so a weaker result there is expected.</p></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="10" data-viz="summary">
+      <div class="step-card">
+        <span class="scene-label">10 of 10</span>
+        <h2>Neighborhood zoning is associated with ELA and science performance after school-level controls, but not with Algebra.</h2>
+        <p>This study looked at 409 NYC public high schools across 43 neighborhoods and asked: does the zoning character of a neighborhood predict how its schools perform, after accounting for everything measurable about the schools?</p>
+        <h3>What we found</h3>
+        <div class="key-numbers">
+          <div class="kn-item"><span class="kn-val sig">ELA ★★</span><span class="kn-lbl">+1.18 points · p=.003 · holds across years</span></div>
+          <div class="kn-item"><span class="kn-val pos">Science ★★</span><span class="kn-lbl">+0.93 points · p=.004 · holds across years</span></div>
+          <div class="kn-item"><span class="kn-val warn">Algebra</span><span class="kn-lbl">+0.28 points · p=.368 · no effect</span></div>
+        </div>
+        <div class="pull caution"><p><strong>What this isn't:</strong> we're not saying rezoning a neighborhood would raise test scores. We're saying neighborhoods where the city allows more commercial and mixed-use activity tend to have higher ELA and science scores — even after school-level differences are accounted for.</p></div>
+        <h3>The next question</h3>
+        <p>Does the neighborhood effect hit some students harder than others? Does high poverty matter less in a better-zoned neighborhood? That's what this study opens up.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="graphic-col">
+    <div class="graphic-wrap">
+      <div class="graphic-header">
+        <span class="graphic-label">Figure</span>
+        <span class="graphic-title" id="gtitle">Score distribution — 409 schools</span>
+      </div>
+      <div class="graphic-body" id="gbody">
+        <div id="tip"></div>
+        <div class="viz-pane active" id="pane-hook"><svg id="svg-hook"></svg></div>
+        <div class="viz-pane" id="pane-icc"><svg id="svg-icc"></svg></div>
+        <div class="viz-pane" id="pane-waterfall"><svg id="svg-waterfall"></svg></div>
+        <div class="viz-pane" id="pane-neq-build"><svg id="svg-neq-build"></svg></div>
+        <div class="viz-pane" id="pane-neq-bars"><svg id="svg-neq-bars"></svg></div>
+        <div class="viz-pane" id="pane-scatter-ela"><svg id="svg-scatter-ela"></svg></div>
+        <div class="viz-pane" id="pane-scatter-three"><svg id="svg-scatter-three"></svg></div>
+        <div class="viz-pane" id="pane-forest"><svg id="svg-forest"></svg></div>
+        <div class="viz-pane" id="pane-validation"><svg id="svg-validation"></svg></div>
+        <div class="viz-pane" id="pane-summary"><svg id="svg-summary"></svg></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p><strong>Behind the Score</strong> — Urban Policy Context and Regents Exam Performance in NYC Public High Schools</p>
+  <p>Vi Kovacevic · M.S. Data Analysis &amp; Visualization · CUNY Graduate Center · Adviser: Dr. Howard Everson · 2026</p>
+  <p>Data: NYSED (New York State Education Department) · NYC PLUTO 2025 · NYC OpenData · NYCCHA (NYC Housing Authority) · Methods: Python 3.12, statsmodels, Restricted Maximum Likelihood (REML) estimation · Code: github.com/vikobal</p>
+</footer>
+
+<script>
+
+/* ── DATA ── */
+const NBHD = [{"neighborhood":"Lower Manhattan","neq":10.0,"mean_score":71.8,"n_schools":6,"mean_econ":70.29,"mean_ell":3.88,"mean_black":19.04,"commfar":12.24,"pct_res":0.03,"ela_resid":1.485,"sci_resid":0.323,"alg_resid":-0.011},{"neighborhood":"Greenwich Village - SoHo","neq":7.47,"mean_score":71.86,"n_schools":2,"mean_econ":69.5,"mean_ell":3.0,"mean_black":25.97,"commfar":5.98,"pct_res":0.01,"ela_resid":0.993,"sci_resid":0.149,"alg_resid":0.042},{"neighborhood":"Gramercy Park - Murray Hill","neq":4.99,"mean_score":71.96,"n_schools":4,"mean_econ":72.55,"mean_ell":18.09,"mean_black":15.46,"commfar":4.1,"pct_res":0.43,"ela_resid":2.787,"sci_resid":0.361,"alg_resid":0.092},{"neighborhood":"Chelsea - Clinton","neq":4.62,"mean_score":66.23,"n_schools":23,"mean_econ":76.93,"mean_ell":12.02,"mean_black":23.65,"commfar":3.83,"pct_res":0.5,"ela_resid":1.031,"sci_resid":0.388,"alg_resid":-0.052},{"neighborhood":"Union Square - Lower East Side","neq":3.22,"mean_score":67.93,"n_schools":19,"mean_econ":80.26,"mean_ell":17.75,"mean_black":21.8,"commfar":1.82,"pct_res":0.64,"ela_resid":2.258,"sci_resid":0.225,"alg_resid":0.119},{"neighborhood":"Long Island City - Astoria","neq":2.41,"mean_score":68.19,"n_schools":15,"mean_econ":75.07,"mean_ell":15.68,"mean_black":4.77,"commfar":0.74,"pct_res":0.73,"ela_resid":0.722,"sci_resid":-0.16,"alg_resid":-0.057},{"neighborhood":"Upper East Side","neq":2.39,"mean_score":72.44,"n_schools":5,"mean_econ":61.73,"mean_ell":10.0,"mean_black":19.39,"commfar":0.72,"pct_res":0.73,"ela_resid":0.568,"sci_resid":0.149,"alg_resid":0.054},{"neighborhood":"Greenpoint","neq":2.07,"mean_score":63.72,"n_schools":7,"mean_econ":84.29,"mean_ell":13.29,"mean_black":31.79,"commfar":0.44,"pct_res":0.78,"ela_resid":0.197,"sci_resid":0.282,"alg_resid":0.057},{"neighborhood":"Sunset Park","neq":1.88,"mean_score":63.83,"n_schools":2,"mean_econ":83.0,"mean_ell":17.0,"mean_black":4.54,"commfar":0.35,"pct_res":0.82,"ela_resid":0.193,"sci_resid":-0.231,"alg_resid":-0.063},{"neighborhood":"High Bridge - Morrisania","neq":1.87,"mean_score":60.26,"n_schools":20,"mean_econ":92.72,"mean_ell":14.98,"mean_black":24.66,"commfar":0.39,"pct_res":0.82,"ela_resid":0.177,"sci_resid":-0.14,"alg_resid":0.006},{"neighborhood":"Hunts Point - Mott Haven","neq":1.82,"mean_score":63.79,"n_schools":11,"mean_econ":90.96,"mean_ell":13.11,"mean_black":16.62,"commfar":0.4,"pct_res":0.84,"ela_resid":0.781,"sci_resid":0.209,"alg_resid":0.153},{"neighborhood":"Upper West Side","neq":1.77,"mean_score":60.21,"n_schools":9,"mean_econ":85.22,"mean_ell":9.11,"mean_black":22.48,"commfar":0.49,"pct_res":0.86,"ela_resid":-1.26,"sci_resid":-0.423,"alg_resid":-0.092},{"neighborhood":"Crotona - Tremont","neq":1.64,"mean_score":61.26,"n_schools":20,"mean_econ":89.71,"mean_ell":12.38,"mean_black":30.34,"commfar":0.25,"pct_res":0.87,"ela_resid":-1.436,"sci_resid":0.152,"alg_resid":0.047},{"neighborhood":"East Harlem","neq":1.64,"mean_score":70.92,"n_schools":8,"mean_econ":82.68,"mean_ell":9.0,"mean_black":37.37,"commfar":0.46,"pct_res":0.89,"ela_resid":3.553,"sci_resid":0.891,"alg_resid":0.226},{"neighborhood":"Williamsburg - Bushwick","neq":1.51,"mean_score":60.86,"n_schools":12,"mean_econ":86.18,"mean_ell":18.62,"mean_black":25.48,"commfar":0.22,"pct_res":0.89,"ela_resid":-2.41,"sci_resid":-0.227,"alg_resid":-0.103},{"neighborhood":"Downtown - Heights - Park Slope","neq":1.48,"mean_score":62.8,"n_schools":22,"mean_econ":78.22,"mean_ell":8.97,"mean_black":48.31,"commfar":0.25,"pct_res":0.91,"ela_resid":-2.496,"sci_resid":-0.648,"alg_resid":0.024},{"neighborhood":"Central Harlem - Morningside Heights","neq":1.46,"mean_score":59.66,"n_schools":5,"mean_econ":88.0,"mean_ell":7.0,"mean_black":65.72,"commfar":0.34,"pct_res":0.92,"ela_resid":0.232,"sci_resid":-0.351,"alg_resid":-0.067},{"neighborhood":"Port Richmond","neq":1.46,"mean_score":59.63,"n_schools":1,"mean_econ":78.0,"mean_ell":13.0,"mean_black":23.01,"commfar":0.22,"pct_res":0.91,"ela_resid":-0.673,"sci_resid":-0.099,"alg_resid":-0.022},{"neighborhood":"East New York","neq":1.32,"mean_score":58.39,"n_schools":12,"mean_econ":88.03,"mean_ell":19.44,"mean_black":40.99,"commfar":0.11,"pct_res":0.93,"ela_resid":-3.7,"sci_resid":-0.328,"alg_resid":-0.081},{"neighborhood":"Washington Heights - Inwood","neq":1.29,"mean_score":62.22,"n_schools":10,"mean_econ":92.52,"mean_ell":29.67,"mean_black":7.75,"commfar":0.16,"pct_res":0.94,"ela_resid":0.52,"sci_resid":0.564,"alg_resid":0.139},{"neighborhood":"Ridgewood - Forest Hills","neq":1.28,"mean_score":67.23,"n_schools":2,"mean_econ":74.5,"mean_ell":17.0,"mean_black":3.18,"commfar":0.12,"pct_res":0.94,"ela_resid":0.584,"sci_resid":-0.161,"alg_resid":-0.032},{"neighborhood":"Fordham - Bronx Park","neq":1.27,"mean_score":63.32,"n_schools":23,"mean_econ":84.08,"mean_ell":20.27,"mean_black":23.97,"commfar":0.14,"pct_res":0.95,"ela_resid":-0.141,"sci_resid":0.743,"alg_resid":0.058},{"neighborhood":"West Queens","neq":1.26,"mean_score":65.17,"n_schools":7,"mean_econ":82.67,"mean_ell":30.28,"mean_black":1.69,"commfar":0.08,"pct_res":0.94,"ela_resid":1.314,"sci_resid":-0.095,"alg_resid":0.042},{"neighborhood":"Kingsbridge - Riverdale","neq":1.24,"mean_score":61.63,"n_schools":6,"mean_econ":90.33,"mean_ell":16.0,"mean_black":20.5,"commfar":0.06,"pct_res":0.94,"ela_resid":-0.226,"sci_resid":0.032,"alg_resid":0.034},{"neighborhood":"Bedford Stuyvesant - Crown Heights","neq":1.23,"mean_score":60.24,"n_schools":15,"mean_econ":86.95,"mean_ell":7.18,"mean_black":83.67,"commfar":0.12,"pct_res":0.95,"ela_resid":-0.492,"sci_resid":-0.112,"alg_resid":-0.015},{"neighborhood":"Borough Park","neq":1.23,"mean_score":67.87,"n_schools":3,"mean_econ":78.0,"mean_ell":16.67,"mean_black":9.81,"commfar":0.09,"pct_res":0.95,"ela_resid":-1.243,"sci_resid":-0.055,"alg_resid":-0.09},{"neighborhood":"Flushing - Clearview","neq":1.22,"mean_score":68.82,"n_schools":6,"mean_econ":79.29,"mean_ell":23.65,"mean_black":2.35,"commfar":0.11,"pct_res":0.95,"ela_resid":-1.543,"sci_resid":-0.036,"alg_resid":0.008},{"neighborhood":"Stapleton - St. George","neq":1.21,"mean_score":62.41,"n_schools":4,"mean_econ":83.5,"mean_ell":7.0,"mean_black":40.64,"commfar":0.09,"pct_res":0.96,"ela_resid":1.491,"sci_resid":-0.15,"alg_resid":-0.062},{"neighborhood":"Coney Island - Sheepshead Bay ","neq":1.18,"mean_score":64.71,"n_schools":9,"mean_econ":81.0,"mean_ell":14.0,"mean_black":26.91,"commfar":0.07,"pct_res":0.96,"ela_resid":-0.648,"sci_resid":-0.266,"alg_resid":-0.115},{"neighborhood":"Northeast Bronx","neq":1.15,"mean_score":62.66,"n_schools":11,"mean_econ":85.18,"mean_ell":19.82,"mean_black":39.01,"commfar":0.05,"pct_res":0.97,"ela_resid":1.509,"sci_resid":-0.111,"alg_resid":0.047},{"neighborhood":"Pelham - Throgs Neck","neq":1.15,"mean_score":61.45,"n_schools":20,"mean_econ":84.07,"mean_ell":17.85,"mean_black":23.28,"commfar":0.06,"pct_res":0.97,"ela_resid":-1.061,"sci_resid":-0.167,"alg_resid":-0.183},{"neighborhood":"Canarsie - Flatlands","neq":1.13,"mean_score":60.96,"n_schools":10,"mean_econ":85.39,"mean_ell":6.25,"mean_black":84.77,"commfar":0.03,"pct_res":0.97,"ela_resid":-1.251,"sci_resid":-0.014,"alg_resid":0.018},{"neighborhood":"Jamaica","neq":1.13,"mean_score":69.91,"n_schools":17,"mean_econ":75.51,"mean_ell":8.59,"mean_black":39.49,"commfar":0.07,"pct_res":0.97,"ela_resid":0.602,"sci_resid":-0.022,"alg_resid":-0.089},{"neighborhood":"Bensonhurst - Bay Ridge","neq":1.12,"mean_score":64.7,"n_schools":7,"mean_econ":74.3,"mean_ell":23.6,"mean_black":9.4,"commfar":0.06,"pct_res":0.97,"ela_resid":-2.149,"sci_resid":-0.273,"alg_resid":-0.073},{"neighborhood":"East Flatbush - Flatbush","neq":1.12,"mean_score":63.58,"n_schools":17,"mean_econ":82.4,"mean_ell":7.02,"mean_black":81.19,"commfar":0.06,"pct_res":0.97,"ela_resid":0.146,"sci_resid":0.238,"alg_resid":0.183},{"neighborhood":"Willowbrook","neq":1.1,"mean_score":75.09,"n_schools":3,"mean_econ":59.33,"mean_ell":2.67,"mean_black":4.89,"commfar":0.03,"pct_res":0.98,"ela_resid":0.817,"sci_resid":0.093,"alg_resid":-0.089},{"neighborhood":"Southwest Queens","neq":1.09,"mean_score":67.32,"n_schools":6,"mean_econ":80.33,"mean_ell":9.5,"mean_black":15.43,"commfar":0.02,"pct_res":0.98,"ela_resid":-0.772,"sci_resid":-0.581,"alg_resid":-0.085},{"neighborhood":"Rockaway","neq":1.08,"mean_score":63.84,"n_schools":7,"mean_econ":77.29,"mean_ell":13.43,"mean_black":43.4,"commfar":0.02,"pct_res":0.98,"ela_resid":-0.166,"sci_resid":-0.101,"alg_resid":0.058},{"neighborhood":"South Beach - Tottenville ","neq":1.05,"mean_score":76.47,"n_schools":3,"mean_econ":54.67,"mean_ell":3.0,"mean_black":4.34,"commfar":0.0,"pct_res":0.99,"ela_resid":-0.199,"sci_resid":-0.266,"alg_resid":-0.021},{"neighborhood":"Southeast Queens","neq":1.02,"mean_score":65.77,"n_schools":10,"mean_econ":73.9,"mean_ell":9.13,"mean_black":69.5,"commfar":0.01,"pct_res":0.99,"ela_resid":-0.565,"sci_resid":0.03,"alg_resid":0.071},{"neighborhood":"Bayside - Little Neck","neq":1.01,"mean_score":70.2,"n_schools":2,"mean_econ":72.5,"mean_ell":6.0,"mean_black":18.18,"commfar":0.0,"pct_res":1.0,"ela_resid":-0.698,"sci_resid":-0.08,"alg_resid":-0.044},{"neighborhood":"Fresh Meadows","neq":1.0,"mean_score":74.17,"n_schools":4,"mean_econ":72.25,"mean_ell":10.5,"mean_black":7.8,"commfar":0.0,"pct_res":1.0,"ela_resid":0.29,"sci_resid":0.018,"alg_resid":-0.044}];
+
+const ICC_DATA = {
+  'Algebra I': {icc:11.1, pct_l1:97.1, b:0.275, p:0.368, mean:62.26, vb0:5.755, vb1:0.167, vb2:0.259},
+  'ELA':       {icc:21.4, pct_l1:78.8, b:1.180, p:0.003, mean:69.39, vb0:20.201,vb1:4.280, vb2:3.147},
+  'Living Env':{icc:21.2, pct_l1:95.2, b:0.931, p:0.004, mean:63.11, vb0:14.325,vb1:0.688, vb2:0.460},
+};
+const FE = [
+  {pred:'ELL %',           alg:-0.339,ela:-4.804,sci:-1.044, alg_se:.312,ela_se:.336,sci_se:.323},
+  {pred:'EconDisadv %',    alg:-1.751,ela:-1.808,sci:-2.327, alg_se:.388,ela_se:.429,sci_se:.417},
+  {pred:'Asian %',         alg: 2.660,ela: 1.572,sci: 2.565, alg_se:.499,ela_se:.631,sci_se:.602},
+  {pred:'Black %',         alg:-1.543,ela:-2.126,sci:-1.876, alg_se:.808,ela_se:.910,sci_se:.892},
+  {pred:'Class Size',      alg: 0.743,ela: 0.935,sci: 1.017, alg_se:.291,ela_se:.329,sci_se:.330},
+  {pred:'Hispanic %',      alg:-1.030,ela:-1.573,sci:-0.852, alg_se:.812,ela_se:.920,sci_se:.944},
+  {pred:'Transfer school', alg:-0.043,ela:-1.210,sci: 0.205, alg_se:1.101,ela_se:1.082,sci_se:1.193},
+  {pred:'CTE (Career Technical Education) school',      alg: 0.388,ela: 0.021,sci: 0.903, alg_se:.887,ela_se:.974,sci_se:.944},
+  {pred:'NEQ  γ₀₁  ← Level 2', alg: 0.275,ela: 1.180,sci: 0.931, alg_se:.306,ela_se:.395,sci_se:.325},
+];
+const VALID = [
+  {yr:'2022',alg:.028, ela:.896, sci:.624, alg_p:.941,ela_p:.065,sci_p:.055},
+  {yr:'2023',alg:.275, ela:1.18, sci:.931, alg_p:.368,ela_p:.003,sci_p:.004},
+  {yr:'2024',alg:-1.745,ela:2.356,sci:1.653,alg_p:.087,ela_p:.004,sci_p:.073},
+];
+
+/* ── PALETTE ── */
+const P={
+  ink:   '#1A1A18',
+  ink2:  '#3D3D3A',
+  ink3:  '#767672',
+  rule:  '#D4D4CF',
+  paper: '#FAFAF8',
+  paper2:'#F2F2EE',
+  grid:  '#E2E2DC',
+  accent:'#C0392B',
+  // data colors
+  alg:   '#B45309',   // amber — Algebra
+  ela:   '#1D4E89',   // deep navy — ELA
+  sci:   '#2D6A4F',   // forest green — Living Env
+  // legacy aliases
+  navy:  '#1A1A18',
+  blue:  '#1D4E89',
+  sky:   '#4A7FB5',
+  green: '#2D6A4F',
+  gbg:   '#E8F4ED',
+  amber: '#7B5200',
+  red:   '#C0392B',
+  rbg:   '#FDECEA',
+  muted: '#767672',
+  line:  '#D4D4CF',
+};
+
+/* ── TOOLTIP ── */
+const tipEl=document.getElementById('tip');
+function showTip(e,html){
+  tipEl.innerHTML=html; tipEl.style.opacity='1';
+  tipEl.style.left=(e.clientX+14)+'px';
+  tipEl.style.top=(e.clientY-12)+'px';
+}
+function hideTip(){ tipEl.style.opacity='0'; }
+
+/* ── HELPERS ── */
+function dims(svgId){
+  const el=document.getElementById(svgId);
+  if(!el) return {w:480,h:340};
+  // Walk up to find a sized container
+  let p=el.parentElement;
+  while(p && !p.clientWidth) p=p.parentElement;
+  const gb=document.getElementById('gbody');
+  const w=(p&&p.clientWidth>0)?p.clientWidth:(gb?gb.clientWidth:480);
+  const h=(p&&p.clientHeight>10)?p.clientHeight:(gb?gb.clientHeight:340);
+  return {w:Math.max(w,200), h:Math.max(h,200)};
+}
+function svg(id){
+  const {w,h}=dims(id);
+  const s=d3.select('#'+id)
+    .attr('viewBox',`0 0 ${w} ${h}`)
+    .attr('width',w).attr('height',h);
+  s.selectAll('*').remove();
+  return {s,w,h};
+}
+function addTitle(s,w,y,text){
+  s.append('text').attr('x',w/2).attr('y',y)
+   .attr('text-anchor','middle').attr('class','chart-ttl').text(text);
+}
+function addAxisLabel(g,text,x,y,rotate){
+  const t=g.append('text').attr('text-anchor','middle').attr('class','chart-sub').text(text);
+  if(rotate){
+    t.attr('transform',`translate(${x},${y}) rotate(${rotate})`);
+  } else {
+    t.attr('x',x).attr('y',y);
+  }
+}
+function dedupe(arr){
+  const seen=new Set(),out=[];
+  for(const d of arr){
+    const k=d.neighborhood.toLowerCase().replace(/manhattam/,'manhattan').trim();
+    if(!seen.has(k)){seen.add(k);out.push(d);}
+  }
+  return out;
+}
+
+
+/* ── SHARED CHART HELPERS ─────────────────────────────────────────── */
+
+// Adaptive title height: give more room when panel is tall
+function chartSetup(svgId) {
+  const {s,w,h} = svg(svgId);
+  const TH = h > 320 ? 48 : 36;   // title+subtitle area
+  return {s, w, h, TH};
+}
+
+// Chart title — always at fixed top, subtitle on next line
+function ttl(s, w, text, sub) {
+  s.append('text')
+   .attr('x', w/2).attr('y', 16)
+   .attr('text-anchor','middle')
+   .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+   .attr('font-size', 12).attr('font-weight','700').attr('fill','#1A1A18')
+   .text(text);
+  if (sub) {
+    s.append('text')
+     .attr('x', w/2).attr('y', 30)
+     .attr('text-anchor','middle')
+     .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+     .attr('font-size', 10).attr('fill','#767672')
+     .text(sub);
+  }
+}
+
+// Rotated y-axis label, positioned safely left of axis
+function yLbl(s, ml, mt, H, text) {
+  s.append('text')
+   .attr('transform', `translate(${ml - 40}, ${mt + H/2}) rotate(-90)`)
+   .attr('text-anchor','middle')
+   .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+   .attr('font-size', 10).attr('fill','#767672')
+   .text(text);
+}
+
+// x-axis label, below chart
+function xLbl(s, ml, mt, W, H, mb, text) {
+  s.append('text')
+   .attr('x', ml + W/2).attr('y', mt + H + mb - 5)
+   .attr('text-anchor','middle')
+   .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+   .attr('font-size', 10).attr('fill','#767672')
+   .text(text);
+}
+
+// Horizontal grid lines
+function hGrid(g, y, W) {
+  y.ticks(5).forEach(t => {
+    g.append('line')
+     .attr('x1',0).attr('x2',W).attr('y1',y(t)).attr('y2',y(t))
+     .attr('stroke', t===0 ? '#C8C8C4' : '#E8E8E3')
+     .attr('stroke-width', t===0 ? 1.5 : 0.8)
+     .attr('stroke-dasharray', t===0 ? '4,3' : 'none');
+  });
+}
+
+// Vertical grid lines
+function vGrid(g, x, H) {
+  x.ticks(5).forEach(t => {
+    g.append('line')
+     .attr('x1',x(t)).attr('x2',x(t)).attr('y1',0).attr('y2',H)
+     .attr('stroke', t===0 ? '#C8C8C4' : '#E8E8E3')
+     .attr('stroke-width', t===0 ? 1.5 : 0.8)
+     .attr('stroke-dasharray', t===0 ? '4,3' : 'none');
+  });
+}
+
+/* ── CHART 1: DOT STRIP ─────────────────────────────────────────── */
+function drawHook() {
+  const {s,w,h,TH} = chartSetup('svg-hook');
+  // Use only 55% of available height for the actual plot area
+  // so there is natural space below without the chart feeling empty
+  const plotH = Math.round(h * 0.52);
+  const topPad = Math.round((h - plotH) * 0.28); // shift cluster up slightly
+  const m = {t: TH + topPad, r: 28, b: h - TH - topPad - plotH, l: 52};
+  const W = w - m.l - m.r, H = plotH;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, '409 NYC public high schools — mean Regents score (2023)',
+      'each dot = one neighborhood mean  ·  color = NEQ policy context score');
+
+  const data = dedupe(NBHD);
+  const x = d3.scaleLinear().domain([56, 80]).range([0, W]);
+
+  // Grid lines
+  [60,65,70,75].forEach(t => {
+    g.append('line').attr('x1',x(t)).attr('x2',x(t)).attr('y1',0).attr('y2',H)
+     .attr('stroke', t===65 ? '#C0C0BC' : '#E8E8E3')
+     .attr('stroke-width', t===65 ? 1.5 : 0.8)
+     .attr('stroke-dasharray', t===65 ? '4,3' : 'none');
+  });
+  g.append('text').attr('x',x(65)+5).attr('y',-6)
+   .attr('font-size',9).attr('fill','#9CA3AF').text('passing mark: 65');
+
+  g.append('g').attr('transform',`translate(0,${H})`)
+   .call(d3.axisBottom(x).ticks(8).tickFormat(d=>d)).attr('class','axis');
+
+  // X-axis label — fixed distance below axis
+  s.append('text')
+   .attr('x', m.l + W/2).attr('y', m.t + H + 36)
+   .attr('text-anchor','middle').attr('class','chart-sub')
+   .text('Mean Regents score (0–100 scale)');
+
+  // Beeswarm
+  const sorted = [...data].sort((a,b) => a.mean_score - b.mean_score);
+  const R = 6;
+  const placed = [];
+  const yC = H / 2;
+
+  sorted.forEach(d => {
+    const cx = x(d.mean_score);
+    let bestY = yC, step = 0, found = false;
+    while (!found && step < H * 0.45) {
+      for (const sign of [0, 1, -1]) {
+        const ty = yC + sign * step;
+        if (ty < R || ty > H - R) continue;
+        const ok = !placed.some(p => {
+          const dx = cx - p.cx, dy = ty - p.cy;
+          return Math.sqrt(dx*dx + dy*dy) < R * 2.3;
+        });
+        if (ok) { bestY = ty; found = true; break; }
+      }
+      step += R * 0.75;
+    }
+    placed.push({cx, cy: bestY, d});
+  });
+
+  g.selectAll('.dot').data(placed).enter().append('circle')
+   .attr('cx', p=>p.cx).attr('cy', p=>p.cy).attr('r', R)
+   .attr('fill', p=>p.d.neq>=4?P.gbg:p.d.neq<1.5?P.rbg:'#EEF2F8')
+   .attr('stroke', p=>p.d.neq>=4?P.green:p.d.neq<1.5?P.red:P.sky)
+   .attr('stroke-width',1.5).attr('opacity',0.88)
+   .on('mouseover',(e,p)=>showTip(e,`<strong>${p.d.neighborhood}</strong><br>Score: ${p.d.mean_score.toFixed(1)}<br>NEQ: ${p.d.neq.toFixed(2)}`))
+   .on('mouseout',hideTip);
+
+  // Annotations
+  [['Lower Manhattan',true],['East New York',false]].forEach(([lbl,above])=>{
+    const p = placed.find(p=>p.d.neighborhood.includes(lbl));
+    if(!p) return;
+    const col = above ? P.green : P.red;
+    const y1=p.cy+(above?-R-2:R+2), y2=p.cy+(above?-20:20), ty=p.cy+(above?-26:28);
+    g.append('line').attr('x1',p.cx).attr('x2',p.cx).attr('y1',y1).attr('y2',y2)
+     .attr('stroke',col).attr('stroke-width',1.5).attr('stroke-dasharray','3,2');
+    g.append('text').attr('x',p.cx).attr('y',ty)
+     .attr('text-anchor','middle').attr('font-size',10).attr('font-weight','700').attr('fill',col)
+     .text(`${lbl}: ${p.d.mean_score.toFixed(1)}`);
+  });
+
+  // Legend — fixed position below x-label
+  const legY = m.t + H + 52;
+  [{c:P.green,bg:P.gbg,l:'High NEQ (≥4)'},{c:P.sky,bg:'#EEF2F8',l:'Mid NEQ 2–4'},{c:P.red,bg:P.rbg,l:'Low NEQ (<2)'}]
+   .forEach(({c,bg,l},i)=>{
+     const gx = m.l + i * Math.min(140, W/3);
+     s.append('circle').attr('cx',gx+5).attr('cy',legY).attr('r',5).attr('fill',bg).attr('stroke',c).attr('stroke-width',1.5);
+     s.append('text').attr('x',gx+14).attr('y',legY+4).attr('font-size',9.5).attr('fill',P.ink3).text(l);
+   });
+}/* ── CHART 2: ICC BARS ──────────────────────────────────────────── */
+function drawICC() {
+  const {s,w,h,TH} = chartSetup('svg-icc');
+  const m = {t: TH, r: 24, b: 56, l: 52};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'Intraclass Correlation Coefficient (ICC) by exam',
+      '% of total score variance between community districts · before any school-level controls');
+
+  const exams = Object.keys(ICC_DATA);
+  const x = d3.scaleBand().domain(exams).range([0,W]).padding(0.4);
+  const y = d3.scaleLinear().domain([0,100]).range([H,0]);
+  const eCol = e => e==='ELA'?P.ela:e==='Living Env'?P.sci:P.alg;
+
+  hGrid(g, y, W);
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x)).attr('class','axis');
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).attr('class','axis');
+  yLbl(s, m.l, m.t, H, '% of total variance');
+
+  // Gray base
+  g.selectAll('.base').data(exams).enter().append('rect')
+   .attr('x',d=>x(d)).attr('y',0).attr('width',x.bandwidth()).attr('height',H)
+   .attr('fill','#ECEEE8');
+
+  // Colored portion (ICC)
+  g.selectAll('.icc').data(exams).enter().append('rect')
+   .attr('x',d=>x(d)).attr('y',d=>y(ICC_DATA[d].icc))
+   .attr('width',x.bandwidth()).attr('height',d=>H-y(ICC_DATA[d].icc))
+   .attr('fill',d=>eCol(d))
+   .on('mouseover',(e,d)=>showTip(e,`<strong>${d}</strong><br>ICC = ${ICC_DATA[d].icc}%<br>Grand mean = ${ICC_DATA[d].mean}`))
+   .on('mouseout',hideTip);
+
+  // % labels above bars
+  g.selectAll('.pct').data(exams).enter().append('text')
+   .attr('x',d=>x(d)+x.bandwidth()/2).attr('y',d=>y(ICC_DATA[d].icc)-8)
+   .attr('text-anchor','middle').attr('font-size',15).attr('font-weight','800').attr('fill',P.ink)
+   .text(d=>ICC_DATA[d].icc+'%');
+
+  // Threshold line at 10%
+  g.append('line').attr('x1',0).attr('x2',W).attr('y1',y(10)).attr('y2',y(10))
+   .attr('stroke',P.accent).attr('stroke-width',1.5).attr('stroke-dasharray','5,3').attr('opacity',0.7);
+  g.append('text').attr('x',W+4).attr('y',y(10)+4).attr('font-size',9).attr('fill',P.accent).text('10% threshold');
+
+  // Legend
+  s.append('text').attr('x',m.l).attr('y',m.t+H+42)
+   .attr('font-size',9.5).attr('fill',P.ink3)
+   .text('■ Between neighborhoods (ICC)   □ Within neighborhoods   — 10% = HLM warranted (Snijders & Bosker, 1999)');
+}
+
+/* ── CHART 3: VARIANCE WATERFALL ────────────────────────────────── */
+function drawWaterfall() {
+  const {s,w,h,TH} = chartSetup('svg-waterfall');
+  const m = {t: TH, r: 24, b: 68, l: 54};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'Between-neighborhood variance — three model steps',
+      'Var(U₀j): variance in school baseline scores between districts · each cluster = one exam');
+
+  const exams = Object.keys(ICC_DATA);
+  const steps = ['Null model','Level 1 controls','L1 + NEQ index'];
+  const cols  = ['#C4C4BE','#8AB4D8',P.ela];
+  const all   = exams.flatMap(e=>[ICC_DATA[e].vb0,ICC_DATA[e].vb1,ICC_DATA[e].vb2]);
+  const x = d3.scaleBand().domain(exams).range([0,W]).padding(0.3);
+  const y = d3.scaleLinear().domain([0,d3.max(all)*1.1]).range([H,0]);
+  const sw = x.bandwidth()/3 - 2;
+
+  hGrid(g, y, W);
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x)).attr('class','axis');
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d.toFixed(1))).attr('class','axis');
+  yLbl(s, m.l, m.t, H, 'Var(U₀j) — between-district variance');
+
+  exams.forEach(exam=>{
+    const d=ICC_DATA[exam];
+    [d.vb0,d.vb1,d.vb2].forEach((v,i)=>{
+      g.append('rect')
+       .attr('x',x(exam)+i*(sw+2)).attr('y',y(v))
+       .attr('width',sw).attr('height',H-y(v))
+       .attr('fill',cols[i])
+       .on('mouseover',e=>showTip(e,`<strong>${exam}</strong><br>${steps[i]}<br>Var(U₀j) = ${v.toFixed(3)}`))
+       .on('mouseout',hideTip);
+    });
+  });
+
+  // Legend
+  const legX = m.l, legY = m.t + H + 44;
+  steps.forEach((l,i)=>{
+    s.append('rect').attr('x',legX+i*(W/3)).attr('y',legY).attr('width',12).attr('height',12).attr('fill',cols[i]);
+    s.append('text').attr('x',legX+i*(W/3)+16).attr('y',legY+10).attr('font-size',10).attr('fill',P.ink3).text(l);
+  });
+}
+
+/* ── CHART 4: CommFAR BARS ──────────────────────────────────────── */
+function drawNEQBuild() {
+  const {s,w,h,TH} = chartSetup('svg-neq-build');
+  const m = {t: TH, r: 20, b: 88, l: 50};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'Commercial Floor Area Ratio (FAR) by community district',
+      'NEQ component 1 · higher CommFAR = more commercial development permitted by zoning · source: NYC PLUTO 2025');
+
+  const data = dedupe(NBHD).sort((a,b)=>b.commfar-a.commfar).slice(0,18);
+  const shortN = n => n.split(/[–,]/)[0].trim().slice(0,15);
+  const x = d3.scaleBand().domain(data.map(d=>shortN(d.neighborhood))).range([0,W]).padding(0.2);
+  const y = d3.scaleLinear().domain([0,d3.max(data,d=>d.commfar)*1.1]).range([H,0]);
+
+  hGrid(g, y, W);
+  g.append('g').attr('transform',`translate(0,${H})`)
+   .call(d3.axisBottom(x).tickSize(3))
+   .attr('class','axis')
+   .selectAll('text')
+   .attr('font-size', Math.max(8, Math.min(10, W/data.length*0.52)))
+   .attr('transform','rotate(-38)')
+   .style('text-anchor','end');
+  g.append('g').call(d3.axisLeft(y).ticks(4).tickFormat(d=>d.toFixed(1))).attr('class','axis');
+  yLbl(s, m.l, m.t, H, 'Mean commercial FAR');
+
+  const colorFn = d3.scaleSequential()
+   .domain([0,d3.max(data,d=>d.commfar)])
+   .interpolator(t=>d3.interpolateRgb('#C8D8EC',P.ela)(t));
+
+  g.selectAll('.bar').data(data).enter().append('rect')
+   .attr('x',d=>x(shortN(d.neighborhood))).attr('y',d=>y(d.commfar))
+   .attr('width',x.bandwidth()).attr('height',d=>H-y(d.commfar))
+   .attr('fill',d=>colorFn(d.commfar))
+   .on('mouseover',(e,d)=>showTip(e,`<strong>${d.neighborhood}</strong><br>CommFAR: ${d.commfar.toFixed(3)}<br>NEQ score: ${d.neq.toFixed(2)}`))
+   .on('mouseout',hideTip);
+}
+
+/* ── CHART 5: NEQ HORIZONTAL BARS ───────────────────────────────── */
+function drawNEQBars() {
+  const {s,w,h,TH} = chartSetup('svg-neq-bars');
+  const data = dedupe(NBHD).sort((a,b)=>b.neq-a.neq);
+  // Label column: 28% of width, min 100, max 155
+  const lblW = Math.max(100, Math.min(155, w*0.28));
+  const m = {t: TH, r: 36, b: 28, l: lblW};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'NEQ policy context score — all 43 community districts (scale 1–10)');
+
+  const shortN = n => {
+    const p = n.replace(/\s*–\s*/g,' / ').split(',')[0].trim();
+    return p.length > 20 ? p.slice(0,19)+'…' : p;
+  };
+
+  const y = d3.scaleBand().domain(data.map(d=>d.neighborhood)).range([0,H]).padding(0.1);
+  const x = d3.scaleLinear().domain([0,10.5]).range([0,W]);
+  const bh = y.bandwidth();
+  const fs = Math.max(7.5, Math.min(10.5, bh*0.75));
+
+  // Custom y-axis labels
+  g.selectAll('.ylbl').data(data).enter().append('text')
+   .attr('x',-6).attr('y',d=>y(d.neighborhood)+bh/2+fs*0.35)
+   .attr('text-anchor','end').attr('font-size',fs).attr('fill',P.ink3)
+   .text(d=>shortN(d.neighborhood));
+
+  g.append('g').attr('transform',`translate(0,${H})`)
+   .call(d3.axisBottom(x).ticks(5).tickFormat(d=>d)).attr('class','axis');
+
+  xLbl(s, m.l, m.t, W, H, m.b, 'NEQ score  (1 = low commercial zoning density · 10 = high)');
+
+  const barCol = d => d.neq>=4 ? P.ela : d.neq>=2 ? '#5A8EC0' : '#C04040';
+
+  g.selectAll('.bar').data(data).enter().append('rect')
+   .attr('x',0).attr('y',d=>y(d.neighborhood))
+   .attr('width',d=>x(d.neq)).attr('height',bh)
+   .attr('fill',d=>barCol(d)).attr('opacity',0.82)
+   .on('mouseover',(e,d)=>showTip(e,`<strong>${d.neighborhood}</strong><br>NEQ: ${d.neq.toFixed(2)}<br>Mean score: ${d.mean_score.toFixed(1)}<br>Schools: ${d.n_schools}`))
+   .on('mouseout',hideTip);
+
+  // Value labels
+  g.selectAll('.vlbl').data(data).enter().append('text')
+   .attr('x',d=>x(d.neq)+3).attr('y',d=>y(d.neighborhood)+bh/2+fs*0.35)
+   .attr('font-size',Math.max(7,fs*0.82)).attr('fill',P.ink).attr('font-weight','600')
+   .text(d=>d.neq.toFixed(1));
+}
+
+/* ── CHART 6: ELA SCATTER ───────────────────────────────────────── */
+function drawScatterELA() {
+  const {s,w,h,TH} = chartSetup('svg-scatter-ela');
+  const m = {t: TH, r: 24, b: 52, l: 56};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'NEQ vs. ELA residual score — 43 community districts',
+      'y-axis = school baseline score after Level 1 controls  ·  dot size = number of schools  ·  γ₀₁ = +1.18  p = .003 ★★');
+
+  const data = dedupe(NBHD);
+  const x = d3.scaleLinear().domain([0.7,10.6]).range([0,W]);
+  const ext = d3.extent(data,d=>d.ela_resid);
+  const y = d3.scaleLinear().domain([ext[0]-0.4,ext[1]+0.4]).range([H,0]);
+  const rSc = d3.scaleSqrt().domain([0,10]).range([3,12]);
+
+  hGrid(g, y, W);
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x).ticks(6)).attr('class','axis');
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d>0?'+'+d.toFixed(1):d.toFixed(1))).attr('class','axis');
+  xLbl(s, m.l, m.t, W, H, m.b, 'NEQ score (1–10)');
+  yLbl(s, m.l, m.t, H, 'ELA residual β₀j — after Level 1 school controls');
+
+  // Trend line
+  const nm=d3.mean(data,d=>d.neq), rm=d3.mean(data,d=>d.ela_resid);
+  const tY=xv=>(xv-nm)*1.18+rm;
+  g.append('line')
+   .attr('x1',x(0.8)).attr('x2',x(10.5))
+   .attr('y1',y(tY(0.8))).attr('y2',y(tY(10.5)))
+   .attr('stroke',P.ela).attr('stroke-width',2).attr('opacity',0.7).attr('stroke-dasharray','6,3');
+
+  // Dots
+  g.selectAll('.dot').data(data).enter().append('circle')
+   .attr('cx',d=>x(d.neq)).attr('cy',d=>y(d.ela_resid))
+   .attr('r',d=>rSc(d.n_schools))
+   .attr('fill',d=>d.neq>=4?P.gbg:d.neq<1.5?P.rbg:'#EEF2F8')
+   .attr('stroke',d=>d.neq>=4?P.green:d.neq<1.5?P.red:P.sky)
+   .attr('stroke-width',1.5).attr('opacity',0.88)
+   .on('mouseover',(e,d)=>showTip(e,`<strong>${d.neighborhood}</strong><br>NEQ: ${d.neq.toFixed(2)}<br>ELA residual: ${d.ela_resid>0?'+':''}${d.ela_resid.toFixed(2)}<br>Schools: ${d.n_schools}`))
+   .on('mouseout',hideTip);
+
+  // Trend label
+  g.append('text').attr('x',x(7.8)).attr('y',y(tY(7.8))-11)
+   .attr('font-size',10).attr('font-weight','700').attr('fill',P.ela)
+   .text('γ₀₁ = +1.18  ★★  p = .003');
+}
+
+/* ── CHART 7: THREE-PANEL SCATTER ───────────────────────────────── */
+function drawScatterThree() {
+  const {s,w,h,TH} = chartSetup('svg-scatter-three');
+  const data = dedupe(NBHD);
+  const panels = [
+    {key:'alg_resid',label:'Algebra I',    color:P.alg, b:0.275,p:0.368,sig:false},
+    {key:'ela_resid',label:'ELA',          color:P.ela, b:1.180,p:0.003,sig:true},
+    {key:'sci_resid',label:'Living Env.',  color:P.sci, b:0.931,p:0.004,sig:true},
+  ];
+  const pw = Math.floor(w/3);
+  const m = {t:TH, r:10, b:38, l:44};
+
+  ttl(s, w, 'NEQ policy context effect across all three Regents exams',
+      'x = NEQ score (1–10)  ·  y = school baseline residual after Level 1  ·  shared axes for honest comparison');
+
+  // Global y extent across all panels
+  const allR = data.flatMap(d=>[d.alg_resid,d.ela_resid,d.sci_resid]);
+  const gExt = [d3.min(allR)-0.4, d3.max(allR)+0.4];
+
+  panels.forEach((pan,pi)=>{
+    const ox = pi*pw;
+    const W2 = pw - m.l - m.r;
+    const H  = h - m.t - m.b;
+    const g  = s.append('g').attr('transform',`translate(${ox+m.l},${m.t})`);
+
+    const x = d3.scaleLinear().domain([0.7,10.6]).range([0,W2]);
+    const y = d3.scaleLinear().domain(gExt).range([H,0]);
+
+    // Grid
+    hGrid(g, y, W2);
+
+    g.append('g').attr('transform',`translate(0,${H})`)
+     .call(d3.axisBottom(x).ticks(4).tickFormat(d=>d)).attr('class','axis');
+    if(pi===0){
+      g.append('g')
+       .call(d3.axisLeft(y).ticks(4).tickFormat(d=>d>0?'+'+d.toFixed(1):d.toFixed(1)))
+       .attr('class','axis');
+    }
+
+    // Trend — significant only
+    if(pan.sig){
+      const nm=d3.mean(data,d=>d.neq), rm=d3.mean(data,d=>d[pan.key]);
+      const tY=xv=>(xv-nm)*pan.b+rm;
+      g.append('line')
+       .attr('x1',x(0.8)).attr('x2',x(10.5))
+       .attr('y1',y(tY(0.8))).attr('y2',y(tY(10.5)))
+       .attr('stroke',pan.color).attr('stroke-width',2).attr('opacity',0.65);
+    }
+
+    g.selectAll('.dot').data(data).enter().append('circle')
+     .attr('cx',d=>x(d.neq)).attr('cy',d=>y(d[pan.key]))
+     .attr('r',4.5).attr('fill',pan.color).attr('opacity',0.55)
+     .attr('stroke','#fff').attr('stroke-width',0.8)
+     .on('mouseover',(e,d)=>showTip(e,`<strong>${d.neighborhood}</strong><br>${pan.label}: ${d[pan.key]>0?'+':''}${d[pan.key].toFixed(2)}`))
+     .on('mouseout',hideTip);
+
+    // Panel label — above chart, in panel color
+    s.append('text').attr('x',ox+m.l+W2/2).attr('y',m.t-6)
+     .attr('text-anchor','middle').attr('font-size',12).attr('font-weight','700').attr('fill',pan.color)
+     .text(pan.label);
+
+    // Result label — below x-axis
+    s.append('text').attr('x',ox+m.l+W2/2).attr('y',m.t+H+m.b-2)
+     .attr('text-anchor','middle').attr('font-size',9.5)
+     .attr('font-weight',pan.sig?'700':'400').attr('fill',pan.sig?pan.color:P.ink3)
+     .text(pan.sig
+       ? `γ₀₁ = +${pan.b}   p = ${pan.p}   ★★`
+       : `γ₀₁ = +${pan.b}   p = ${pan.p}   ns`);
+  });
+}
+
+/* ── CHART 8: FOREST PLOT ───────────────────────────────────────── */
+function drawForest() {
+  const {s,w,h,TH} = chartSetup('svg-forest');
+  const lblW = Math.max(118, Math.min(165, w*0.30));
+  const m = {t:TH, r:20, b:28, l:lblW};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'Fixed effects — standardized β (beta) coefficients with 95% confidence intervals (CI)',
+      'filled circle = significant p<.05 · CI not crossing zero = significant · three exams shown simultaneously');
+
+  const rowH = H/FE.length;
+  const xDom = [-5.8,3.6];
+  const x = d3.scaleLinear().domain(xDom).range([0,W]);
+  const cols = [P.alg,P.ela,P.sci];
+  const keys = ['alg','ela','sci'];
+  const ofs  = [-5,0,5];
+
+  vGrid(g, x, H);
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x).ticks(6)).attr('class','axis');
+
+  FE.forEach((d,i)=>{
+    const isNEQ = i===FE.length-1;
+    const y0 = i*rowH + rowH/2;
+    const fs = Math.max(8, Math.min(10, rowH*0.56));
+
+    if(isNEQ){
+      g.append('rect').attr('x',-m.l).attr('y',i*rowH+1).attr('width',W+m.l+4).attr('height',rowH-2)
+       .attr('fill','#EEF4F8').attr('rx',2);
+    }
+
+    // Row label
+    g.append('text').attr('x',-8).attr('y',y0+fs*0.38)
+     .attr('text-anchor','end').attr('font-size',fs)
+     .attr('font-weight',isNEQ?'700':'400').attr('fill',isNEQ?P.ink:P.ink3)
+     .text(d.pred);
+
+    keys.forEach((k,j)=>{
+      const b=d[k], se=d[k+'_se'], ci0=b-1.96*se, ci1=b+1.96*se;
+      const sig = ci0>0||ci1<0;
+      const yy = y0+ofs[j];
+
+      // CI line
+      g.append('line').attr('x1',x(ci0)).attr('x2',x(ci1)).attr('y1',yy).attr('y2',yy)
+       .attr('stroke',cols[j]).attr('stroke-width',sig?2:1.2).attr('opacity',sig?0.9:0.32);
+      // Point
+      g.append('circle').attr('cx',x(b)).attr('cy',yy).attr('r',sig?5:3.5)
+       .attr('fill',sig?cols[j]:'#fff').attr('stroke',cols[j]).attr('stroke-width',sig?0:1.5)
+       .on('mouseover',e=>showTip(e,`<strong>${d.pred}</strong><br>${['Algebra','ELA','Living Env'][j]}<br>β = ${b>0?'+':''}${b.toFixed(3)}<br>95% CI: [${ci0.toFixed(2)}, ${ci1.toFixed(2)}]`))
+       .on('mouseout',hideTip);
+    });
+  });
+
+  // Legend
+  const leg = s.append('g').attr('transform',`translate(${m.l},${m.t-22})`);
+  ['Algebra I','ELA','Living Env.'].forEach((l,i)=>{
+    leg.append('circle').attr('cx',i*(W/3)+6).attr('cy',0).attr('r',5).attr('fill',cols[i]);
+    leg.append('text').attr('x',i*(W/3)+15).attr('y',4).attr('font-size',10).attr('fill',P.ink3).text(l);
+  });
+}
+
+/* ── CHART 9: VALIDATION ────────────────────────────────────────── */
+function drawValidation() {
+  const {s,w,h,TH} = chartSetup('svg-validation');
+  const m = {t:TH, r:36, b:56, l:56};
+  const W = w - m.l - m.r, H = h - m.t - m.b;
+  const g = s.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  ttl(s, w, 'NEQ coefficient (γ₀₁) — three-year directional replication',
+      'filled circle = statistically significant p<.05  ·  all six primary-year coefficients are positive');
+
+  const x = d3.scalePoint().domain(['2022','2023','2024']).range([0,W]).padding(0.45);
+  const allV = VALID.flatMap(d=>[d.alg,d.ela,d.sci]);
+  const y = d3.scaleLinear().domain([d3.min(allV)-0.4,d3.max(allV)+0.4]).range([H,0]);
+
+  hGrid(g, y, W);
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x)).attr('class','axis');
+  g.append('g').call(d3.axisLeft(y).ticks(6).tickFormat(d=>d>0?'+'+d.toFixed(2):d.toFixed(2))).attr('class','axis');
+  yLbl(s, m.l, m.t, H, 'γ₀₁ coefficient value');
+
+  // Zero line label
+  g.append('text').attr('x',W+4).attr('y',y(0)+4).attr('font-size',9).attr('fill',P.ink3).text('zero');
+
+  const series=[
+    {key:'alg',pk:'alg_p',label:'Algebra I',  c:P.alg},
+    {key:'ela',pk:'ela_p',label:'ELA',        c:P.ela},
+    {key:'sci',pk:'sci_p',label:'Living Env.',c:P.sci},
+  ];
+
+  series.forEach(sr=>{
+    g.append('path').datum(VALID).attr('fill','none').attr('stroke',sr.c)
+     .attr('stroke-width',1.8).attr('opacity',0.5)
+     .attr('d',d3.line().x(d=>x(d.yr)).y(d=>y(d[sr.key])));
+
+    VALID.forEach(d=>{
+      const p=d[sr.pk], sig=p<0.05, val=d[sr.key];
+      g.append('circle').attr('cx',x(d.yr)).attr('cy',y(val)).attr('r',sig?9:6)
+       .attr('fill',val>0?sr.c:P.accent).attr('stroke','#fff').attr('stroke-width',2)
+       .attr('opacity',sig?1:0.55)
+       .on('mouseover',e=>showTip(e,`<strong>${sr.label}</strong><br>${d.yr}: γ₀₁ = ${val>0?'+':''}${val.toFixed(3)}<br>p = ${p.toFixed(3)}`))
+       .on('mouseout',hideTip);
+      if(sig){
+        g.append('text').attr('x',x(d.yr)).attr('y',y(val)-14)
+         .attr('text-anchor','middle').attr('font-size',10).attr('font-weight','700').attr('fill',sr.c)
+         .text('★★');
+      }
+    });
+  });
+
+  // Legend
+  const leg = s.append('g').attr('transform',`translate(${m.l},${m.t+H+38})`);
+  series.forEach((sr,i)=>{
+    leg.append('circle').attr('cx',i*(W/3)+6).attr('cy',0).attr('r',5).attr('fill',sr.c);
+    leg.append('text').attr('x',i*(W/3)+15).attr('y',4).attr('font-size',10).attr('fill',P.ink3).text(sr.label);
+  });
+}
+
+/* ── CHART 10: SUMMARY ──────────────────────────────────────────── */
+function drawSummary() {
+  const {s,w,h,TH} = chartSetup('svg-summary');
+  ttl(s, w, 'Study summary — Behind the Score, 2026',
+      'Vi Kovacevic  ·  CUNY Graduate Center  ·  Adviser: Dr. Howard Everson');
+
+  const cards = [
+    {label:'ELA  γ₀₁',         val:'+1.18', sub:'p = .003   ★★   significant',   c:P.ela},
+    {label:'Living Env.  γ₀₁', val:'+0.93', sub:'p = .004   ★★   significant',   c:P.sci},
+    {label:'Algebra  γ₀₁',     val:'+0.28', sub:'p = .368   not significant (ns)',c:P.ink3},
+    {label:'Schools',           val:'409',   sub:'Gen. Academic · CTE · Transfer', c:P.ink},
+    {label:'Neighborhoods',     val:'43',    sub:'NYC community districts',         c:P.ink},
+    {label:'Model audit',       val:'23/23', sub:'All verification checks passed ✓',c:P.sci},
+  ];
+
+  const pad=20, gx=10, gy=10;
+  const cw = (w - pad*2 - gx*2) / 3;
+  const ch = (h - pad*2 - gy - TH - 8) / 2;
+
+  cards.forEach((card,i)=>{
+    const col=i%3, row=Math.floor(i/3);
+    const cx=pad+col*(cw+gx), cy=TH+8+pad/2+row*(ch+gy);
+    s.append('rect').attr('x',cx).attr('y',cy).attr('width',cw).attr('height',ch)
+     .attr('fill','#fff').attr('stroke',P.rule).attr('stroke-width',1).attr('rx',2);
+    s.append('text').attr('x',cx+cw/2).attr('y',cy+ch*0.28)
+     .attr('text-anchor','middle').attr('font-size',9).attr('fill',P.ink3)
+     .attr('font-weight','700').attr('letter-spacing','0.07em')
+     .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+     .text(card.label.toUpperCase());
+    s.append('text').attr('x',cx+cw/2).attr('y',cy+ch*0.57)
+     .attr('text-anchor','middle').attr('font-size',Math.min(30,cw*0.22))
+     .attr('font-weight','800').attr('fill',card.c).attr('letter-spacing','-0.02em')
+     .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+     .text(card.val);
+    s.append('text').attr('x',cx+cw/2).attr('y',cy+ch*0.8)
+     .attr('text-anchor','middle').attr('font-size',9).attr('fill',P.ink3)
+     .attr('font-family','-apple-system,Helvetica Neue,Arial,sans-serif')
+     .text(card.sub);
+  });
+}
+
+
+/* ── PANEL MAP ── */
+const PANELS={
+  hook:'hook', icc:'icc', waterfall:'waterfall',
+  'neq-build':'neq-build', 'neq-bars':'neq-bars',
+  'scatter-ela':'scatter-ela', 'scatter-three':'scatter-three',
+  forest:'forest', validation:'validation', summary:'summary',
+};
+const TITLES={
+  hook:'Score distribution — 409 schools',
+  icc:'ICC — % of variance between neighborhoods',
+  waterfall:'Variance decomposition across 3 model steps',
+  'neq-build':'Commercial FAR — NEQ index component 1',
+  'neq-bars':'NEQ score — all 43 community districts',
+  'scatter-ela':'NEQ vs. ELA residual — the central finding',
+  'scatter-three':'NEQ effect across all three exams',
+  forest:'Fixed effects — all predictors with 95% CI',
+  validation:'γ₀₁ across three years',
+  summary:'Study summary',
+};
+const DRAWS={
+  hook:drawHook, icc:drawICC, waterfall:drawWaterfall,
+  'neq-build':drawNEQBuild, 'neq-bars':drawNEQBars,
+  'scatter-ela':drawScatterELA, 'scatter-three':drawScatterThree,
+  forest:drawForest, validation:drawValidation, summary:drawSummary,
+};
+const VIZ_MAP={
+  '1':'hook','2':'icc','3':'waterfall','4':'neq-build',
+  '5':'neq-bars','6':'scatter-ela','7':'scatter-three',
+  '8':'forest','9':'validation','10':'summary',
+};
+const drawn=new Set();
+
+function activate(vizId){
+  document.querySelectorAll('.viz-pane').forEach(p=>p.classList.remove('active'));
+  const pane=document.getElementById('pane-'+vizId);
+  if(pane) pane.classList.add('active');
+  document.getElementById('gtitle').textContent=TITLES[vizId]||'';
+  if(!drawn.has(vizId) && DRAWS[vizId]){
+    requestAnimationFrame(()=>{ DRAWS[vizId](); drawn.add(vizId); });
+  }
+}
+
+/* ── SCROLLAMA ── */
+const scroller=scrollama();
+scroller.setup({step:'.step',offset:.45})
+  .onStepEnter(({element})=>{
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('is-active'));
+    element.classList.add('is-active');
+    const step=element.dataset.step;
+    const viz=VIZ_MAP[step];
+    if(viz) activate(viz);
+    document.getElementById('scene-ct').textContent=`${step} / 10`;
+  });
+
+/* ── PROGRESS ── */
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100;
+  document.getElementById('prog').style.width=Math.min(pct,100)+'%';
+},{passive:true});
+
+/* ── RESIZE ── */
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    drawn.clear(); scroller.resize();
+    const active=document.querySelector('.step.is-active');
+    if(active){
+      const viz=VIZ_MAP[active.dataset.step];
+      if(viz) activate(viz);
+    }
+  },200);
+},{passive:true});
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  // Ensure graphic-body has rendered before drawing
+  document.querySelector('.step').classList.add('is-active');
+  // Small delay to allow CSS layout to complete
+  setTimeout(()=>{ activate('hook'); }, 50);
+});
+
+</script>
+</body>
+</html>
