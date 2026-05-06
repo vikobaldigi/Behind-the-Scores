@@ -1,44 +1,44 @@
-Neighborhood	NEQ_score	mean_regents_score	median_income	pct_park_access	nycha_units
-Lower Manhattan	10	71.8	198945	100	0
-Lower Manhattam	8.02	66.7	198945	100	0
-Greenwich Village - SoHo	7.47	71.9	198945	100	0
-Gramercy Park - Murray Hill	4.99	72	144175	92.7	492
-Chelsea - Clinton	4.62	66.2	122723	96.6	2450
-Union Square - Lower East Side	3.22	67.9	54482	100	4520
-Long Island City - Astoria	2.41	68.2	89203	77.4	0
-Upper East Side	2.39	72.4	159241	97.7	1323
-Greenpoint	2.07	63.7	111492	98.9	3839
-Sunset Park	1.88	63.8	87149	89.1	0
-High Bridge - Morrisania	1.87	60.3	34391	99.7	5201
-Hunts Point - Mott Haven	1.82	63.8	33940	99.2	5234
-Upper West Side	1.77	60.2	150017	100	2750
-East Harlem	1.64	70.9	45233	100	3703
-Crotona - Tremont	1.64	61.3	32801	99.2	4553
-Williamsburg - Bushwick	1.51	60.9	94974	93.8	5160
-Downtown - Heights - Park Slope	1.48	62.8	155492	96.6	1375
-Port Richmond	1.46	59.6	72834	68.8	3080
-Central Harlem - Morningside Heights	1.46	59.7	51742	99.8	3263
-East New York	1.32	58.4	45610	93.4	7586
-Washington Heights - Inwood	1.29	62.2	61527	99.7	998
-Ridgewood - Forest Hills	1.28	67.2	87844	76.9	0
-Fordham - Bronx Park	1.27	63.3	50634	95.6	3651
-West Queens	1.26	65.2	77375	78.5	0
-Kingsbridge - Riverdale	1.24	61.6	75218	95.7	577
-Borough Park	1.23	67.9	67187	76.3	0
-Bedford Stuyvesant - Crown Heights	1.23	60.2	78152	92.4	6779
-Flushing - Clearview	1.22	68.8	62308	82.1	919
-Stapleton - St. George	1.21	62.4	72834	68.8	3080
-Coney Island - Sheepshead Bay 	1.18	64.7	55165	87.2	4098
-Northeast Bronx	1.15	62.7	69497	73.1	2562
-Pelham - Throgs Neck	1.15	61.4	71021	70.5	850
-Jamaica	1.13	69.9	75235	75.9	1964
-Canarsie - Flatlands	1.13	61	88188	79	0
-Bensonhurst - Bay Ridge	1.12	64.7	78781	78.8	0
-East Flatbush - Flatbush	1.12	63.6	72777	64.1	135
-Willowbrook	1.1	75.1	96471	73.9	1430
-Southwest Queens	1.09	67.3	94234	67.2	0
-Rockaway	1.08	63.8	52797	86.4	2620
-South Beach - Tottenville 	1.05	76.5	104493	72.8	1430
-Southeast Queens	1.02	65.8	89267	60	1964
-Bayside - Little Neck	1.01	70.2	107607	75.3	0
-Fresh Meadows	1	74.2	78065	70.2	0
+Neighborhood,NEQ_score,mean_regents_score,median_income,pct_park_access,nycha_units
+Lower Manhattan,10.0,71.8,198945,100.0,0
+Lower Manhattam,8.02,66.7,198945,100.0,0
+Greenwich Village - SoHo,7.47,71.9,198945,100.0,0
+Gramercy Park - Murray Hill,4.99,72.0,144175,92.7,492
+Chelsea - Clinton,4.62,66.2,122723,96.6,2450
+Union Square - Lower East Side,3.22,67.9,54482,100.0,4520
+Long Island City - Astoria,2.41,68.2,89203,77.4,0
+Upper East Side,2.39,72.4,159241,97.7,1323
+Greenpoint,2.07,63.7,111492,98.9,3839
+Sunset Park,1.88,63.8,87149,89.1,0
+High Bridge - Morrisania,1.87,60.3,34391,99.7,5201
+Hunts Point - Mott Haven,1.82,63.8,33940,99.2,5234
+Upper West Side,1.77,60.2,150017,100.0,2750
+East Harlem,1.64,70.9,45233,100.0,3703
+Crotona - Tremont,1.64,61.3,32801,99.2,4553
+Williamsburg - Bushwick,1.51,60.9,94974,93.8,5160
+Downtown - Heights - Park Slope,1.48,62.8,155492,96.6,1375
+Port Richmond,1.46,59.6,72834,68.8,3080
+Central Harlem - Morningside Heights,1.46,59.7,51742,99.8,3263
+East New York,1.32,58.4,45610,93.4,7586
+Washington Heights - Inwood,1.29,62.2,61527,99.7,998
+Ridgewood - Forest Hills,1.28,67.2,87844,76.9,0
+Fordham - Bronx Park,1.27,63.3,50634,95.6,3651
+West Queens,1.26,65.2,77375,78.5,0
+Kingsbridge - Riverdale,1.24,61.6,75218,95.7,577
+Borough Park,1.23,67.9,67187,76.3,0
+Bedford Stuyvesant - Crown Heights,1.23,60.2,78152,92.4,6779
+Flushing - Clearview,1.22,68.8,62308,82.1,919
+Stapleton - St. George,1.21,62.4,72834,68.8,3080
+Coney Island - Sheepshead Bay ,1.18,64.7,55165,87.2,4098
+Northeast Bronx,1.15,62.7,69497,73.1,2562
+Pelham - Throgs Neck,1.15,61.4,71021,70.5,850
+Jamaica,1.13,69.9,75235,75.9,1964
+Canarsie - Flatlands,1.13,61.0,88188,79.0,0
+Bensonhurst - Bay Ridge,1.12,64.7,78781,78.8,0
+East Flatbush - Flatbush,1.12,63.6,72777,64.1,135
+Willowbrook,1.1,75.1,96471,73.9,1430
+Southwest Queens,1.09,67.3,94234,67.2,0
+Rockaway,1.08,63.8,52797,86.4,2620
+South Beach - Tottenville ,1.05,76.5,104493,72.8,1430
+Southeast Queens,1.02,65.8,89267,60.0,1964
+Bayside - Little Neck,1.01,70.2,107607,75.3,0
+Fresh Meadows,1.0,74.2,78065,70.2,0
